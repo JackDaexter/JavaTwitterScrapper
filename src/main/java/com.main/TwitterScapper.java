@@ -1,7 +1,7 @@
 package com.main;
 
 import com.argument.ReadArgument;
-import com.loadpage.LoadPage;
+import com.pagemanager.LoadPage;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import picocli.CommandLine;

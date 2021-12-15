@@ -1,4 +1,4 @@
-package com.loadpage;
+package com.pagemanager;
 
 import java.util.*;
 
