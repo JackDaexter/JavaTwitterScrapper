@@ -1,16 +1,16 @@
 package com.loadpage;
 
-import java.util.Objects;
+import java.util.*;
 
 
 public class LoadPage {
 
-    private String link;
-    private String parameters;
+    private final String link;
+    private HashMap<String, String> parameters;
 
-    public LoadPage(String link, String parameters){
-        link = Objects.requireNonNull(link);
-        parameters = Objects.requireNonNull(parameters);
+    public LoadPage(String link, HashMap<String,String> parameters){
+        this.link = Objects.requireNonNull(link);
+        this.parameters = Collections.unmodifiableMap(parameters);
     }
 
 

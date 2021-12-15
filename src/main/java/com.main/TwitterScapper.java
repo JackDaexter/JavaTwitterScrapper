@@ -1,9 +1,13 @@
 package com.main;
 
 import com.argument.ReadArgument;
+import com.loadpage.LoadPage;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import picocli.CommandLine;
+
+import java.util.HashMap;
+import java.util.List;
 
 public class TwitterScapper {
     public static void main(String[] args) {
@@ -12,8 +16,9 @@ public class TwitterScapper {
         WebDriver driver = new ChromeDriver();
 
         try {
-            int commandLine = new CommandLine(new ReadArgument()).execute(args);
-            //driver.get();
+            var arguments = parseArguments(args);
+            LoadPage loadPage = new LoadPage(link,arguments);
+
         }catch(Exception e){
             System.err.println("Error : " + e);
         }finally {
@@ -22,8 +27,10 @@ public class TwitterScapper {
     }
 
 
-    public static void parseArguments(String[] args){
-
+    public static HashMap<String,String> parseArguments(String[] args){
+        CommandLine commandLine = new CommandLine(new ReadArgument());
+        commandLine.execute(args);
+        return commandLine.getExecutionResult();
     }
 
 }
