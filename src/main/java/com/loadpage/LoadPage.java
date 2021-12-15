@@ -2,6 +2,7 @@ package com.loadpage;
 
 import java.util.Objects;
 
+
 public class LoadPage {
 
     private String link;
