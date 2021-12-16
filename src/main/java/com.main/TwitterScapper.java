@@ -2,11 +2,14 @@ package com.main;
 
 import com.argument.ReadArgument;
 import com.pagemanager.LoadPage;
+import com.pagemanager.ParsePage;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import picocli.CommandLine;
 
+import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class TwitterScapper {
     public static void main(String[] args) {
@@ -19,8 +22,9 @@ public class TwitterScapper {
             var arguments = parseArguments(args);
             LoadPage loadPage = new LoadPage(link,arguments);
             String relink = loadPage.getLink();
-            System.out.println(relink);
-            driver.get(relink);
+
+            ParsePage parse = new ParsePage(driver);
+            parse.retrieveTweets(relink);
 
             Thread.sleep(10000);
 
