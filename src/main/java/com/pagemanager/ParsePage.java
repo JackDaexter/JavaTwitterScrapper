@@ -52,8 +52,7 @@ public class ParsePage implements Runnable{
     public void handleBlockingQueue(String element){
         if(element != null) {
             try {
-                System.out.println("ENTRE");
-
+                System.out.println("THREAD : " + Thread.currentThread());
                 synchronized (tweetList){
                     while (tweetList.size() == MAX_TWEET){
                         System.out.println("WAIT");
@@ -68,15 +67,6 @@ public class ParsePage implements Runnable{
             }
         }
     }
-
-    public void tweetSlicer(String tweet){
-
-    }
-
-    public void tweetWithCitationSlicer(String tweet){
-
-    }
-
 
     @Override
     public void run() {

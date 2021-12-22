@@ -3,12 +3,12 @@ package com.tweetmanager;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 
-public class TweetQueueConsumer {
+public class TweetConsumer implements Runnable{
 
     private final BlockingQueue<String> queue;
     private int MAX_TWEET = 20;
 
-    public TweetQueueConsumer(BlockingQueue<String> queue, int max_Tweet){
+    public TweetConsumer(BlockingQueue<String> queue){
         this.queue = Objects.requireNonNull(queue);
     }
 
@@ -16,13 +16,15 @@ public class TweetQueueConsumer {
         int nb_tweet = 0;
         synchronized (queue) {
 
+            System.out.print("consume : ");
             while(queue.isEmpty()) {
+                System.out.println("empty");
                 queue.wait();
             }
 
             queue.notify();
 
-            System.out.println(queue.take());
+            System.out.println(queue.take().getBytes());
 
         }
     }
@@ -39,5 +41,10 @@ public class TweetQueueConsumer {
             }
             nbOfTweetRead++;
         }
+    }
+
+    @Override
+    public void run() {
+        readTweet();
     }
 }

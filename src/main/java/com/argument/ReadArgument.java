@@ -4,6 +4,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -22,10 +23,10 @@ public class ReadArgument implements Callable<Map<String,String>> {
     @Option(names = {"-l", "--limit"}, description="How many tweet you want to analyse", defaultValue = "10")
     private String limit;
 
-    @Option(names = {"-b", "--begin"}, description="The year you want the tweet begin : YEAR-MONTH-DAY",defaultValue = "2016-01-01")
+    @Option(names = {"-b", "--begin"}, description="The year you want the tweet begin : YEAR-MONTH-DAY",defaultValue = "2021-05-01")
     private String begin;
 
-    @Option(names = {"-e", "--end"}, description="The year you want the tweet end : YEAR-MONTH-DAY", defaultValue = "2021-01-01")
+    @Option(names = {"-e", "--end"}, description="The year you want the tweet end : YEAR-MONTH-DAY", defaultValue = "2021-06-01")
     private String end;
 
     @Option(names = {"-p", "--proxy"}, description="Yes or no you want use proxy", defaultValue = "false")
@@ -68,13 +69,22 @@ public class ReadArgument implements Callable<Map<String,String>> {
         }
 
         assert begin != null;
-        LocalDate beginDate =  LocalDate.parse(begin);
-        LocalDate endDate =  LocalDate.parse(end);
+        LocalDate dateBegin =  LocalDate.parse(begin);
+        LocalDate dateEnd =  LocalDate.parse(end);
 
-        if(endDate.compareTo(beginDate) < 0){
+        int year = Period.between(dateBegin, dateEnd).getYears();
+
+
+        if(dateEnd.compareTo(dateBegin) < 0){
             System.err.println("Error : End date have to be bigger than begin date");
             return false;
         }
+        if(year > 1){
+            System.err.println("Error : Interval between dates have to be less than 1 year");
+            return false;
+        }
+
+
         return true;
     }
 }

@@ -1,14 +1,12 @@
 package com.threading;
 
-import com.main.TwitterScapper;
 import com.pagemanager.LoadPage;
 import com.pagemanager.ParsePage;
-import com.tweetmanager.TweetQueueConsumer;
+import com.tweetmanager.TweetConsumer;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 
-import java.sql.Array;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
@@ -52,16 +50,24 @@ public class TwitterScrapperThread {
         LocalDate dateBegin = LocalDate.parse(begin);
         LocalDate dateEnd = LocalDate.parse(end);
 
-        return Period.between(dateBegin, dateEnd).getDays() / 7;
+        int month = Period.between(dateBegin, dateEnd).getMonths();
+        int days = Period.between(dateBegin, dateEnd).getDays();
+
+        System.out.println("MONTH : " + month);
+        System.out.println("DAYS : " + days);
+        return (month * 4) + (days / 7) ;
     }
 
     private void startThread(Map<WebDriver,LoadPage> listOfLoadPage, ArrayList<ParsePage> listOfParsePage, int nbOfWeeks,LocalDate dateBegin){
-        TweetQueueConsumer tqc = new TweetQueueConsumer(queue);
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless");
 
         do{
-            listOfLoadPage.put(new ChromeDriver(),new LoadPage(link,dateBegin.toString(),dateBegin.plusDays(7).toString(),parameters));
-            nbOfWeeks -= 7;
+            listOfLoadPage.put(new ChromeDriver(options),new LoadPage(link,dateBegin.toString(),dateBegin.plusDays(7).toString(),parameters));
+            nbOfWeeks--;
         }while (nbOfWeeks > 0);
+
+        System.out.println("SIZE : " + listOfLoadPage.size());
 
         System.out.println(listOfLoadPage.size());
         listOfLoadPage.forEach( (d,l) -> {
@@ -70,7 +76,8 @@ public class TwitterScrapperThread {
             t.start();
         });
 
-        tqc.readTweet();
+        Thread consumerThread = new Thread(new TweetConsumer(queue));
+        consumerThread.start();
     }
 
 }
