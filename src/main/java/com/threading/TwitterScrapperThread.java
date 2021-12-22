@@ -3,12 +3,14 @@ package com.threading;
 import com.main.TwitterScapper;
 import com.pagemanager.LoadPage;
 import com.pagemanager.ParsePage;
+import com.tweetmanager.TweetQueueConsumer;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.sql.Array;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -50,20 +52,25 @@ public class TwitterScrapperThread {
         LocalDate dateBegin = LocalDate.parse(begin);
         LocalDate dateEnd = LocalDate.parse(end);
 
-        return Long.valueOf(Duration.between(dateBegin, dateEnd).toDays() / 7).intValue();
+        return Period.between(dateBegin, dateEnd).getDays() / 7;
     }
 
     private void startThread(Map<WebDriver,LoadPage> listOfLoadPage, ArrayList<ParsePage> listOfParsePage, int nbOfWeeks,LocalDate dateBegin){
+        TweetQueueConsumer tqc = new TweetQueueConsumer(queue);
+
         do{
             listOfLoadPage.put(new ChromeDriver(),new LoadPage(link,dateBegin.toString(),dateBegin.plusDays(7).toString(),parameters));
             nbOfWeeks -= 7;
         }while (nbOfWeeks > 0);
 
+        System.out.println(listOfLoadPage.size());
         listOfLoadPage.forEach( (d,l) -> {
             String relink = l.getLink();
-            ParsePage parse = new ParsePage(d,relink,queue);
-            parse.retrieveTweets();
+            Thread t = new Thread(new ParsePage(d,relink,queue));
+            t.start();
         });
+
+        tqc.readTweet();
     }
 
 }

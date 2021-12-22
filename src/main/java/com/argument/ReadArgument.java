@@ -45,7 +45,6 @@ public class ReadArgument implements Callable<Map<String,String>> {
             arguments.put("end",end);
             arguments.put("proxy",proxy);
         }
-        System.exit(1);
         return arguments;
     }
 
@@ -72,8 +71,8 @@ public class ReadArgument implements Callable<Map<String,String>> {
         LocalDate beginDate =  LocalDate.parse(begin);
         LocalDate endDate =  LocalDate.parse(end);
 
-        if(beginDate.compareTo(endDate) < 0){
-            System.err.println("End date have to be bigger than begin date");
+        if(endDate.compareTo(beginDate) < 0){
+            System.err.println("Error : End date have to be bigger than begin date");
             return false;
         }
         return true;

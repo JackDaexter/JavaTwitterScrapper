@@ -13,6 +13,7 @@ public class ParsePage implements Runnable{
     private final ArrayList<String> array = new ArrayList<>();
     private final BlockingQueue<String> tweetList;
     private final String link;
+    private final int MAX_TWEET = 30;
 
     public ParsePage(WebDriver driver,String link,BlockingQueue<String> queue){
         this.driver = Objects.requireNonNull(driver);
@@ -41,13 +42,27 @@ public class ParsePage implements Runnable{
                 .stream()
                 .filter(x -> x.findElements(By.tagName("article")).size() != 0)
                 .map(x -> x.getAttribute("innerText"))
+                .distinct()
+                .limit(MAX_TWEET)
                 .forEach(this::handleBlockingQueue);
+
+        driver.close();
     }
 
     public void handleBlockingQueue(String element){
         if(element != null) {
             try {
-                tweetList.put(element);
+                System.out.println("ENTRE");
+
+                synchronized (tweetList){
+                    while (tweetList.size() == MAX_TWEET){
+                        System.out.println("WAIT");
+                        tweetList.wait();
+                        System.out.println("END WAIT");
+                    }
+                    tweetList.notify();
+                    tweetList.put(element);
+                }
             } catch (Exception e) {
                 System.err.println("Error : " + e);
             }

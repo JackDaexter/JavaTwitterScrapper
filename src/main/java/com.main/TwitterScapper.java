@@ -16,15 +16,11 @@ public class TwitterScapper {
         final String link = "https://twitter.com/search?";
         final BlockingQueue<String> tweetList = new LinkedBlockingDeque<>(300);
 
+        var arguments = parseArguments(args);
+        var twitterScrapperThread = TwitterScrapperThread.getInstance();
+        twitterScrapperThread.loadData(link, arguments);
+        twitterScrapperThread.start();
 
-        try {
-            var arguments = parseArguments(args);
-            var twitterScrapperThread = TwitterScrapperThread.getInstance();
-            twitterScrapperThread.loadData(link, arguments);
-            twitterScrapperThread.start();
-        } catch (Exception e) {
-            System.err.println("Error : " + e);
-        }
 
     }
 
