@@ -8,14 +8,14 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 
-public class ParsePage implements Runnable{
+public class TweetProducer implements Runnable{
     private final WebDriver driver;
     private final ArrayList<String> array = new ArrayList<>();
     private final BlockingQueue<String> tweetList;
     private final String link;
     private final int MAX_TWEET = 30;
 
-    public ParsePage(WebDriver driver,String link,BlockingQueue<String> queue){
+    public TweetProducer(WebDriver driver, String link, BlockingQueue<String> queue){
         this.driver = Objects.requireNonNull(driver);
         this.link = Objects.requireNonNull(link);
         this.tweetList = queue;
@@ -23,7 +23,7 @@ public class ParsePage implements Runnable{
 
     public void retrieveTweets(){
         JavascriptExecutor jsa = (JavascriptExecutor) driver;
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(25));
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
         driver.get(link);
 
         /* Avoid error because of DOM element disapear/reapear*/
@@ -42,7 +42,6 @@ public class ParsePage implements Runnable{
                 .stream()
                 .filter(x -> x.findElements(By.tagName("article")).size() != 0)
                 .map(x -> x.getAttribute("innerText"))
-                .distinct()
                 .limit(MAX_TWEET)
                 .forEach(this::handleBlockingQueue);
 
@@ -62,7 +61,7 @@ public class ParsePage implements Runnable{
                     tweetList.notify();
                     tweetList.put(element);
                 }
-            } catch (Exception e) {
+            }catch (Exception e) {
                 System.err.println("Error : " + e);
             }
         }

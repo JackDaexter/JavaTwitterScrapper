@@ -1,12 +1,14 @@
 package com.threading;
 
 import com.pagemanager.LoadPage;
-import com.pagemanager.ParsePage;
+import com.pagemanager.TweetProducer;
 import com.tweetmanager.TweetConsumer;
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
@@ -39,7 +41,7 @@ public class TwitterScrapperThread {
         LocalDate dateBegin = LocalDate.parse(parameters.get("begin"));
         LocalDate dateEnd = LocalDate.parse(parameters.get("end"));
         Map<WebDriver,LoadPage> listOfLoadPage = new HashMap<>(nbOfWeeks);
-        ArrayList<ParsePage> listOfParsePage = new ArrayList<>(nbOfWeeks);
+        ArrayList<TweetProducer> listOfParsePage = new ArrayList<>(nbOfWeeks);
         webDriver = new ArrayList<>(nbOfWeeks);
 
         startThread(listOfLoadPage,listOfParsePage,nbOfWeeks,dateBegin);
@@ -53,13 +55,13 @@ public class TwitterScrapperThread {
         int month = Period.between(dateBegin, dateEnd).getMonths();
         int days = Period.between(dateBegin, dateEnd).getDays();
 
-        System.out.println("MONTH : " + month);
-        System.out.println("DAYS : " + days);
         return (month * 4) + (days / 7) ;
     }
 
-    private void startThread(Map<WebDriver,LoadPage> listOfLoadPage, ArrayList<ParsePage> listOfParsePage, int nbOfWeeks,LocalDate dateBegin){
+    private void startThread(Map<WebDriver,LoadPage> listOfLoadPage, ArrayList<TweetProducer> listOfParsePage, int nbOfWeeks, LocalDate dateBegin){
         ChromeOptions options = new ChromeOptions();
+        options.setPageLoadStrategy(PageLoadStrategy.EAGER);
+        options.addArguments("--disable-images");
         options.addArguments("--headless");
 
         do{
@@ -67,12 +69,11 @@ public class TwitterScrapperThread {
             nbOfWeeks--;
         }while (nbOfWeeks > 0);
 
-        System.out.println("SIZE : " + listOfLoadPage.size());
 
-        System.out.println(listOfLoadPage.size());
         listOfLoadPage.forEach( (d,l) -> {
+            //d.manage().timeouts().pageLoadTimeout(Duration.ofSeconds());
             String relink = l.getLink();
-            Thread t = new Thread(new ParsePage(d,relink,queue));
+            Thread t = new Thread(new TweetProducer(d,relink,queue));
             t.start();
         });
 

@@ -25,7 +25,6 @@ public class TweetConsumer implements Runnable{
             queue.notify();
 
             System.out.println(queue.take().getBytes());
-
         }
     }
 
@@ -40,6 +39,7 @@ public class TweetConsumer implements Runnable{
                 e.printStackTrace();
             }
             nbOfTweetRead++;
+            System.out.println("SIZE : " + nbOfTweetRead);
         }
     }
 
