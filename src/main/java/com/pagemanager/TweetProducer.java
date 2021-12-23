@@ -13,12 +13,13 @@ public class TweetProducer implements Runnable{
     private final ArrayList<String> array = new ArrayList<>();
     private final BlockingQueue<String> tweetList;
     private final String link;
-    private final int MAX_TWEET = 30;
+    private final int MAX_TWEET;
 
-    public TweetProducer(WebDriver driver, String link, BlockingQueue<String> queue){
+    public TweetProducer(WebDriver driver, String link, BlockingQueue<String> queue, int max_tweet){
         this.driver = Objects.requireNonNull(driver);
         this.link = Objects.requireNonNull(link);
         this.tweetList = queue;
+        this.MAX_TWEET = max_tweet;
     }
 
     public void retrieveTweets(){
@@ -38,10 +39,17 @@ public class TweetProducer implements Runnable{
         WebElement element = driver.findElement(By.cssSelector("#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-417010 > main > div > div > div > div > div > div:nth-child(2) > div > div > section > div > div"));
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
 
-        element.findElements(By.cssSelector("*"))
+        /*element.findElements(By.cssSelector("*"))
                 .stream()
                 .filter(x -> x.findElements(By.tagName("article")).size() != 0)
                 .map(x -> x.getAttribute("innerText"))
+                .limit(MAX_TWEET)
+                .forEach(this::handleBlockingQueue);*/
+
+        element.findElements(By.cssSelector("*"))
+                .stream()
+                .map(x -> x.getAttribute("innerText"))
+                .distinct()
                 .limit(MAX_TWEET)
                 .forEach(this::handleBlockingQueue);
 
@@ -51,12 +59,10 @@ public class TweetProducer implements Runnable{
     public void handleBlockingQueue(String element){
         if(element != null) {
             try {
-                System.out.println("THREAD : " + Thread.currentThread());
+
                 synchronized (tweetList){
                     while (tweetList.size() == MAX_TWEET){
-                        System.out.println("WAIT");
                         tweetList.wait();
-                        System.out.println("END WAIT");
                     }
                     tweetList.notify();
                     tweetList.put(element);

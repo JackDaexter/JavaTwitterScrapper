@@ -8,7 +8,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
@@ -61,23 +60,25 @@ public class TwitterScrapperThread {
     private void startThread(Map<WebDriver,LoadPage> listOfLoadPage, ArrayList<TweetProducer> listOfParsePage, int nbOfWeeks, LocalDate dateBegin){
         ChromeOptions options = new ChromeOptions();
         options.setPageLoadStrategy(PageLoadStrategy.EAGER);
-        options.addArguments("--disable-images");
+        options.addArguments("--blink-settings=imagesEnabled=false");
         options.addArguments("--headless");
+        int limit = Integer.parseInt(parameters.get("limit"));
+        int max_tweets = limit * nbOfWeeks;
 
         do{
             listOfLoadPage.put(new ChromeDriver(options),new LoadPage(link,dateBegin.toString(),dateBegin.plusDays(7).toString(),parameters));
+            dateBegin = dateBegin.plusDays(7);
             nbOfWeeks--;
         }while (nbOfWeeks > 0);
 
 
         listOfLoadPage.forEach( (d,l) -> {
-            //d.manage().timeouts().pageLoadTimeout(Duration.ofSeconds());
             String relink = l.getLink();
-            Thread t = new Thread(new TweetProducer(d,relink,queue));
+            Thread t = new Thread(new TweetProducer(d,relink,queue,limit));
             t.start();
         });
 
-        Thread consumerThread = new Thread(new TweetConsumer(queue));
+        Thread consumerThread = new Thread(new TweetConsumer(queue,max_tweets));
         consumerThread.start();
     }
 

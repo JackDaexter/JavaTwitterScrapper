@@ -6,10 +6,11 @@ import java.util.concurrent.BlockingQueue;
 public class TweetConsumer implements Runnable{
 
     private final BlockingQueue<String> queue;
-    private int MAX_TWEET = 20;
+    private final int MAX_TWEET;
 
-    public TweetConsumer(BlockingQueue<String> queue){
+    public TweetConsumer(BlockingQueue<String> queue,int max_tweet){
         this.queue = Objects.requireNonNull(queue);
+        this.MAX_TWEET = max_tweet;
     }
 
     public void consume() throws InterruptedException {
